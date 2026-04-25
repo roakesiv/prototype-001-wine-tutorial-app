@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wine Tutorial App</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section class="app-card">
+      <header class="app-header">
+        <p class="eyebrow">Beginner Wine Tasting</p>
+        <h1>Wine Tutorial App</h1>
+        <p class="subtitle">
+          Learn to taste wine in a simple, friendly way. No snobbery. No homework.
+        </p>
+      </header>
+
+      <section class="progress-section" aria-label="Progress">
+        <p id="progress-text">Step 1 of 6</p>
+        <div class="progress-bar" aria-hidden="true">
+          <div id="progress-fill" class="progress-fill"></div>
+        </div>
+      </section>
+
+      <section class="step-section">
+        <h2 id="step-title">Welcome</h2>
+        <div id="step-content" class="step-content">
+          <p>
+            This app helps you practice a simple wine tasting flow. You do not need
+            expert knowledge to begin.
+          </p>
+          <button id="begin-button" class="primary-button" type="button">Begin</button>
+        </div>
+      </section>
+
+      <footer class="navigation">
+        <button id="back-button" class="secondary-button" type="button">Back</button>
+        <button id="next-button" class="primary-button" type="button">Next</button>
+      </footer>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

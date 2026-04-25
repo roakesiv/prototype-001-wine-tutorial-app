@@ -1,177 +1,240 @@
-# Prototype Sprint 01 — Wine Tutorial App
+# Prototype Sprint 02 — Guided Beginner Wine Tutorial
 
 ## 1. Purpose
 
-This sprint is meant to help me learn how to rapidly create and ship a simple software prototype using AI tools, without requiring prior software engineering experience.
+This sprint is meant to turn Prototype 01 from a functional tasting-note form into a more genuine guided beginner wine tutorial.
 
-The primary goal is to complete one small, low-stress prototype cycle in one week so I can build confidence, learn the workflow, and create a repeatable process for future prototypes.
+The goal is to improve the product concept, user experience, and instructional value without adding backend complexity or major system architecture changes.
+
+---
 
 ## 2. Learning Objectives
 
 By the end of this sprint, I want to:
-- understand the basic workflow for creating a simple web prototype,
-- learn how to use ChatGPT as a prototype development assistant,
-- learn how GitHub is used to store and share code,
-- understand the basic structure of a small web app using HTML, CSS, and JavaScript,
-- practice shipping a prototype with limited scope instead of overplanning.
+- practice basic design thinking in a lightweight, usable way,
+- learn how to use source material to improve product content,
+- better separate product content from application behavior,
+- improve confidence in revising an existing prototype rather than only building from scratch,
+- continue learning how software changes ripple across UX, app structure, and code.
+
+---
 
 ## 3. Prototype Objectives
 
-The prototype for this sprint is a beginner-friendly wine tutorial web app.
+Prototype 02 should:
+- add short lesson text to each tasting step,
+- make the experience feel less like homework and more like guided coaching,
+- redesign the final section so it feels less clunky,
+- better distinguish lesson notes from user tasting notes,
+- use the wine journal as source material for improved tutorial content.
 
-The app should:
-- guide a user through a simple wine tasting flow,
-- make wine tasting feel approachable and non-intimidating,
-- allow the user to optionally add comments at each step,
-- compile those comments and selections into a final tasting note,
-- exist as a simple web-based app that can be shared.
+### Product Reframing
 
-### MVP Definition
+Prototype 01 was primarily a tasting-note form.
 
-The MVP is a beginner-friendly web app for casual wine drinkers who feel intimidated by wine language, wine culture, or the tasting process.
+Prototype 02 should shift the product toward a guided beginner wine tutorial.
 
-It guides users through a simple, structured wine tasting flow, allows optional comments at each step, and compiles the results into a final tasting note.
+This means the app should include two different content layers:
 
-The purpose of the MVP is to demystify wine tasting, build user confidence, and make the experience feel approachable rather than exclusive or overly complex.
+1. **Lesson Notes**
+   - static, authored instructional guidance
+   - definitions, hints, and beginner-friendly explanations
 
-### Experience Principle
+2. **Tasting Notes**
+   - dynamic, user-generated responses
+   - selections, comments, ratings, and reflections
 
-The app should feel friendly, light, and supportive. It should enhance the wine tasting experience without feeling intrusive, academic, or like homework.
+### Locked Day 1 Product Framing
+
+**Product Identity**  
+A guided beginner wine tutorial web app that teaches simple tasting skills while capturing personal tasting notes.
+
+**User Statement**  
+The product is for beginner or casual wine drinkers who want help understanding how to taste wine without feeling judged, overwhelmed, or forced into expert language too quickly.
+
+**Problem Statement**  
+Prototype 1 successfully captured tasting notes, but it did not feel enough like a tutorial. It felt too bland, too form-like, and too much like homework. Prototype 2 should solve that by adding guided lesson content, improving the instructional flow, and making the experience feel more like coaching than data entry.
+
+**Experience Principle**  
+The app should feel friendly, encouraging, and lightweight. It should guide the user step by step, teach only what is needed in the moment, and reduce the feeling of pressure or performance.
+
+**Success Criteria for Prototype 2 Framing**  
+Prototype 2 is successful if:
+- each step teaches something useful in a short and approachable way,
+- the distinction between lesson notes and tasting notes is clearer,
+- the final step feels cleaner and more natural,
+- the app feels more like a beginner tutorial than a homework form,
+- the prototype still works end to end.
+
+---
 
 ## 4. Success Criteria
 
 This sprint is successful if, by the end of the week:
-- I have created a basic working web app,
-- the app can be opened and used in a browser,
-- the app guides a user through the tasting steps,
-- the app allows optional comments,
-- the app generates a final tasting note,
-- the code is saved in GitHub,
-- I better understand the end-to-end prototype workflow.
+- the app still works end to end,
+- each step includes clearer instructional guidance,
+- the experience feels more like a tutorial and less like homework,
+- the final step feels cleaner and more intentional,
+- the distinction between lesson notes and tasting notes is clearer,
+- the wine journal has been processed into a usable source artifact,
+- the updated prototype is saved locally and uploaded to GitHub.
 
-## 5. Acceptance Criteria
+---
 
-This prototype sprint is successful if the following conditions are met:
-
-### Functional Criteria
-- The app opens and runs in a web browser.
-- The app guides the user through a structured wine tasting flow.
-- The tasting flow includes the steps: Look, Smell, Taste, Feel, and Final Note.
-- Each tasting step allows the user to optionally enter a comment.
-- The app stores the user’s selections and comments during the session.
-- At the end of the flow, the app generates a compiled tasting note based on the user’s inputs.
-
-### Technical Criteria
-- The prototype is built as a simple web app using HTML, CSS, and JavaScript.
-- The prototype does not require a backend, database, user accounts, or login system.
-- The project files are stored locally in the prototype folder.
-- The project is uploaded to GitHub by the end of the sprint.
-
-### Scope and Completion Criteria
-- The prototype is functional even if the design is visually simple.
-- The app uses simple, beginner-friendly language.
-- The build stays within the defined MVP scope.
-- Completion and learning are prioritized over polish or feature expansion.
-
-## 6. Constraints and Assumptions
+## 5. Constraints and Assumptions
 
 This sprint is intentionally constrained.
 
 Assumptions and constraints:
-- I am a beginner with no software engineering background.
-- I have limited time and energy.
-- This effort must stay small and non-stressful.
-- This is a prototype, not production software.
-- I will use simple tools and avoid unnecessary technical complexity.
-- I will prioritize completion and learning over polish.
+- no backend,
+- no database,
+- no account system,
+- no mobile packaging,
+- no major architecture overhaul,
+- no attempting to solve every identified issue at once,
+- keep the sprint lightweight and centered on content and UX improvement.
 
-## 7. Tools Established
+---
+
+## 6. Tools Established
 
 The tools for this sprint are:
-- ChatGPT Project for ongoing context, planning, and coding help,
-- ChatGPT chat for coaching, code generation, debugging, and explanation,
-- GitHub for storing and sharing the code,
-- local files on my Surface as the source of truth,
-- basic web files: HTML, CSS, and JavaScript.
+- local prototype folder on Surface as the source of truth,
+- ChatGPT Project and this chat for planning, coaching, and implementation support,
+- GitHub for storage, sharing, and version tracking,
+- VS Code for editing and managing code,
+- HTML, CSS, and JavaScript for the prototype itself,
+- the wine journal as source material for tutorial improvements.
 
-Optional later tools may include local code editors or more advanced AI coding tools, but they are not required for this sprint.
+Optional later tools may include visual modeling artifacts, but those are not required for this sprint.
+
+---
+
+## 7. In Scope
+
+The following items are in scope for Prototype 02:
+- short lesson text by step,
+- redesign of the final step so it feels less clunky,
+- clearer distinction between lesson notes and tasting notes,
+- processing the wine journal into a reusable source file,
+- modest UX and visual improvements only if they directly support the tutorial goal.
+
+---
 
 ## 8. Out of Scope
 
 To keep this sprint focused, the following are out of scope:
-- mobile app development,
-- production-quality architecture,
-- backend development,
-- databases,
-- login systems,
-- AI chat features inside the app,
-- advanced frameworks such as React or Next.js,
+- backend persistence,
+- database or account system,
+- mobile packaging,
+- export features unless they become a small stretch goal later,
+- major architecture refactor as the primary goal,
+- polished production design,
 - analytics,
-- monetization,
-- recommendation engine features,
-- polishing beyond what is needed for a functional prototype.
+- search,
+- recommendation engine features.
+
+---
 
 ## 9. One-Week Cadence / Daily Plan
 
 This sprint should be completed in small, manageable sessions across one week.
 
-### Day 1 — Plan and setup
-- finalize the learning plan,
-- create a GitHub account,
-- create a ChatGPT Project for the prototype,
-- define the MVP structure.
+### Day 1 — Frame Prototype 02
+- define the Prototype 02 concept clearly,
+- document what changes from Prototype 01,
+- lock the in-scope and out-of-scope items,
+- define the learning goals for this sprint,
+- decide the main product framing language.
 
-### Day 2 — Learn the app structure
-- understand HTML, CSS, and JavaScript at a beginner level,
-- define the screens or steps in the app,
-- outline the data the app needs to capture.
+### Day 2 — Process the Wine Journal
+- review the wine journal,
+- extract the most useful beginner education ideas,
+- group content into categories such as:
+  - look,
+  - smell,
+  - taste,
+  - feel,
+  - beginner guidance,
+  - definitions,
+  - reassurance / tone,
+- create a structured source file for later use.
 
-### Day 3 — Build the first working version
-- create the basic app structure,
-- add the step-by-step wine tasting flow,
-- make the app function at a minimal level.
+### Day 3 — Redesign the Product Flow
+- decide what lesson text appears on each step,
+- decide how lesson notes and tasting notes are separated,
+- redesign the final step so it feels less clunky,
+- update the app spec for Prototype 02.
 
-### Day 4 — Add comments and final note logic
-- allow optional comments at each step,
-- compile inputs into a final tasting note,
-- test the flow from start to finish.
+### Day 4 — Update Content and UX Structure
+- add lesson text to each step,
+- revise step instructions so they feel friendlier and more guided,
+- adjust labels and prompts to reduce the homework feeling,
+- begin restructuring the final step in the app.
 
-### Day 5 — Save and organize
-- clean up the code enough to be understandable,
-- add the project to GitHub,
-- write a short README describing the prototype.
+### Day 5 — Rework the Final Step
+- simplify or reorganize the final section,
+- better distinguish:
+  - quick reaction,
+  - user tasting note,
+  - generated technical note,
+- remove or reduce clunky combinations,
+- test whether the final experience feels more natural.
 
-### Day 6 — Polish and review
-- improve wording and usability,
-- fix obvious bugs,
-- make the app feel more approachable.
+### Day 6 — Light Polish and Review
+- do a full walkthrough of Prototype 02,
+- identify rough spots,
+- make small UX and copy adjustments,
+- confirm the concept now feels more like a tutorial,
+- update README or notes if needed.
 
-### Day 7 — Reflect and assess
-- document what I learned,
-- identify what was confusing or difficult,
-- assess whether the sprint met its goals,
-- define the next prototype or next skill to learn.
+### Day 7 — Reflection and Assessment
+- reflect on product improvements,
+- reflect on learning improvements,
+- assess whether the tutorial framing worked,
+- document what still feels weak,
+- define candidate directions for Prototype 03.
 
-## 10. End-of-Week Reflection
+---
+
+## 10. Source Material Plan
+
+The wine journal should be turned into a reusable source artifact rather than treated as one long raw document.
+
+The source file should likely include:
+- core beginner wine principles,
+- step-by-step tasting guidance,
+- definitions of common tasting terms,
+- reassurance and anti-snobbery tone guidance,
+- candidate lesson snippets by app step,
+- ideas for improving the tutorial flow.
+
+This source artifact should be designed to support future prototype iterations as well.
+
+---
+
+## 11. End-of-Week Reflection
 
 At the end of the sprint, I will record:
-- what I built,
-- what I learned,
-- what parts felt easy,
-- what parts felt hard or confusing,
-- what I would do differently next time,
-- what the next logical step is.
+- what changed from Prototype 01,
+- what improved in product clarity,
+- what improved in tutorial value,
+- what still feels weak or clunky,
+- what I learned about design thinking and UX,
+- what I would change in the next iteration.
 
-The goal is to turn this from a one-time build into a repeatable learning cycle.
+The goal is to use Prototype 02 not just to improve the app, but to improve my process for shaping better software prototypes.
 
-## 11. Coach Assessment
+---
+
+## 12. Coach Assessment
 
 After completion, this sprint should include a short coaching assessment that evaluates:
-- whether the scope was appropriate,
-- whether I completed the prototype goals,
-- which skills showed progress,
-- which blockers slowed me down,
-- whether the workflow felt sustainable,
-- what the best next step is for continued learning.
+- whether the Prototype 02 scope was appropriate,
+- whether the tutorial framing improved the product,
+- whether the final step became more coherent,
+- whether the source-material approach worked well,
+- which software and product skills improved,
+- what the best next step is for Prototype 03.
 
-This assessment should be honest, practical, and focused on helping me improve my next prototype cycle.
+This assessment should stay practical, honest, and useful for continued learning.

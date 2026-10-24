@@ -255,3 +255,12 @@ Paste useful prompts here.
 - Responses remain session-only. Reloading clears notes, as stated in the UI and spec.
 - The existing untracked `Source Files/Wine Tracker.xlsx` is unrelated and is excluded from this change.
 - Publish source changes to the existing experimental GitHub branch. A merge into `main` or website hosting change is separate work.
+
+## October 23, 2026 — GitHub Pages release
+
+- User requested deployment of the tested Prototype 02 redesign to the existing phone-accessible site.
+- Confirmed Pages is configured for the root of `main`, using the existing GitHub Pages branch build with HTTPS enforced.
+- Release path: review and merge `v1-learning-lab` into `main`, then wait for the Pages build and verify the served HTML, CSS, JavaScript, and mobile flow.
+- The app assets are the same ones that passed desktop/mobile and keyboard-only checks in revision `8845f44`; this release preparation changes documentation only.
+- Live address: https://roakesiv.github.io/prototype-001-wine-tutorial-app/
+- Keep experimental work on `v1-learning-lab`. Do not include the unrelated untracked workbook in release commits.

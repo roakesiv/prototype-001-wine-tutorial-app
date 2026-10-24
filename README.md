@@ -39,4 +39,4 @@ Keyboard: Tab and Shift+Tab move between controls; arrow keys move within radio 
 
 Use `v1-learning-lab` for prototype work. `main` is the stable, published branch. Review the exact diff and add only intended files before committing; do not add raw source workbooks incidentally.
 
-The existing remote is [roakesiv/prototype-001-wine-tutorial-app](https://github.com/roakesiv/prototype-001-wine-tutorial-app). Pushing this branch shares the source code. Website deployment is a separate step; this revision does not change hosting or merge into `main`.
+The existing remote is [roakesiv/prototype-001-wine-tutorial-app](https://github.com/roakesiv/prototype-001-wine-tutorial-app). Pushing `v1-learning-lab` shares the experimental source code. To release a tested version, merge it into `main`. GitHub Pages publishes the root of `main` over HTTPS at [the live tasting guide](https://roakesiv.github.io/prototype-001-wine-tutorial-app/). Wait for the Pages build and verify the live app after merging.

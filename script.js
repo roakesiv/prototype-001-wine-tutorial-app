@@ -1,4 +1,5 @@
 // script.js
+// Prototype 02 — Guided Beginner Wine Tutorial
 
 // -----------------------------
 // App state
@@ -10,7 +11,7 @@ const steps = [
   "Smell",
   "Taste",
   "Feel",
-  "Final Note"
+  "Reflect"
 ];
 
 let currentStepIndex = 0;
@@ -26,21 +27,21 @@ const tastingData = {
   },
   taste: {
     dryness: "",
-    body: "",
+    acidity: "",
     note: ""
   },
   feel: {
-    acidity: "",
+    body: "",
     tannin: "",
     finish: "",
     note: ""
   },
-  review: {
+  reflect: {
     stars: "",
     buyAgain: "",
-    userReview: "",
-    generatedTechnicalNote: "",
-    userTechnicalNote: ""
+    userTake: "",
+    guidedDirectNote: "",
+    userTastingNote: ""
   }
 };
 
@@ -56,166 +57,376 @@ const backButton = document.getElementById("back-button");
 const nextButton = document.getElementById("next-button");
 
 // -----------------------------
-// Render helpers
+// Small rendering helpers
+// -----------------------------
+
+function createLessonNote(doThis, whyItMatters, goodEnough) {
+  return `<section class="lesson-card"><h3>Lesson Note</h3><p class="do-this">${doThis}</p><p class="reassurance">${goodEnough}</p>${createDetails("Why this matters", `<p>${whyItMatters}</p>`)}</section>`;
+}
+
+function createDetails(summary, content) {
+  return `
+    <details class="help-details">
+      <summary>${summary}</summary>
+      <div class="help-content">
+        ${content}
+      </div>
+    </details>
+  `;
+}
+
+const questions = {"look-color":"What color is your wine?","smell-aroma":"What does it smell like?","taste-dryness":"Does it taste dry or sweet?","taste-acidity":"How tangy does it feel?","feel-body":"How heavy does it feel?","feel-tannin":"How drying does it feel?","feel-finish":"How long does it linger?","reflect-stars":"How much did you like it?","reflect-buy-again":"Would you buy it again?"};
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+}
+function createChoices(id, options, selectedValue) {
+  return `<fieldset id="${id}" class="choice-field"><legend>${questions[id]}</legend><div class="choices">${options.map(option => `<label class="choice" data-value="${option}"><input type="radio" name="${id}" value="${option}" ${selectedValue === option ? 'checked' : ''} required><span>${option === 'Skip' ? 'Skip · unsure' : option}</span></label>`).join('')}</div></fieldset>`;
+}
+function readChoice(field) { return field.querySelector('input:checked')?.value || ''; }
+
+// -----------------------------
+// Progress and navigation
 // -----------------------------
 
 function updateProgress() {
-  progressText.textContent = `Step ${currentStepIndex + 1} of ${steps.length}`;
+  progressText.textContent = `Step ${currentStepIndex + 1} of ${steps.length} · ${steps[currentStepIndex]}`;
+  document.getElementById('step-trail').innerHTML = steps.map((step, index) => `<li ${index === currentStepIndex ? 'aria-current="step"' : ''} class="${index < currentStepIndex ? 'done' : ''}"><span>${index < currentStepIndex ? '✓' : index + 1}</span>${step}</li>`).join('');
   const progressPercent = ((currentStepIndex + 1) / steps.length) * 100;
   progressFill.style.width = `${progressPercent}%`;
 }
 
 function updateNavigation() {
-  backButton.disabled = currentStepIndex === 0;
+  backButton.hidden = currentStepIndex === 0;
 
   if (steps[currentStepIndex] === "Welcome") {
     nextButton.style.display = "none";
   } else {
     nextButton.style.display = "inline-block";
-    nextButton.textContent = currentStepIndex === steps.length - 1 ? "Finish" : "Next";
+    nextButton.textContent = currentStepIndex === steps.length - 1 ? "Finish tasting ✓" : `Next · ${steps[currentStepIndex + 1]} →`;
   }
 }
+
+// -----------------------------
+// Guided note generation
+// -----------------------------
+
+function valueIsUsable(value) {
+  return value && value !== "Skip";
+}
+
+function generateGuidedDirectNote() {
+  const descriptions = [];
+  const { look, smell, taste, feel } = tastingData;
+  if (look.color) descriptions.push(`This is a ${look.color.toLowerCase()} wine${smell.aroma ? ` with ${smell.aroma.toLowerCase()} aromas` : ''}.`);
+  else if (smell.aroma) descriptions.push(`I notice ${smell.aroma.toLowerCase()} aromas.`);
+  const tasteDetails = [];
+  if (valueIsUsable(taste.dryness)) tasteDetails.push(`It tastes ${taste.dryness.toLowerCase()}`);
+  if (valueIsUsable(taste.acidity)) tasteDetails.push(`${taste.acidity.toLowerCase()} acidity`);
+  if (tasteDetails.length) descriptions.push(`${tasteDetails.join(' with ').replace(/^(low|medium|high) acidity$/, 'It has $1 acidity')}.`);
+  const feelDetails = [];
+  if (valueIsUsable(feel.body)) feelDetails.push(`a ${feel.body.toLowerCase()} body`);
+  if (valueIsUsable(feel.tannin) && feel.tannin !== 'N/A') feelDetails.push(`${feel.tannin.toLowerCase()} tannin`);
+  if (valueIsUsable(feel.finish)) feelDetails.push(`a ${feel.finish.toLowerCase()} finish`);
+  if (feelDetails.length) descriptions.push(`It has ${feelDetails.length > 1 ? feelDetails.slice(0, -1).join(', ') + ' and ' : ''}${feelDetails.at(-1)}.`);
+  const userNotes = [look.note, smell.note, taste.note, feel.note].filter(note => note.trim());
+  if (userNotes.length) descriptions.push(`Your notes: ${userNotes.join(' ')}`);
+  tastingData.reflect.guidedDirectNote = descriptions.join(' ') || 'Your observations will appear here.';
+  return tastingData.reflect.guidedDirectNote;
+}
+
+// -----------------------------
+// Step markup
+// -----------------------------
 
 function getStepMarkup(stepName) {
   switch (stepName) {
     case "Welcome":
       return `
-        <p>
-          This app helps you practice a simple wine tasting flow.
-          You do not need expert knowledge to begin.
-        </p>
-        <button id="begin-button" class="primary-button" type="button">Begin</button>
+        <section class="welcome-copy">
+          <div class="glass-art" aria-hidden="true"><svg viewBox="0 0 180 210"><path d="M48 20h84l8 64c4 30-17 51-50 51S36 114 40 84z" fill="#fff8ed" stroke="currentColor" stroke-width="3"/><path d="M43 72q47 17 94 0l3 12c4 30-17 51-50 51S36 114 40 84z" fill="#963e59"/><path d="M90 135v52m-29 4h58" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="m149 23 4 11 11 4-11 4-4 11-4-11-11-4 11-4z" fill="#bb873e"/></svg></div>
+          <p class="eyebrow">A little curiosity. A glass of wine.</p>
+          <h2>Wine tasting,<br>without the snobbery.</h2>
+          <p>Look, sniff, sip. Discover what you enjoy, one simple observation at a time.</p>
+          <p class="reassurance">No perfect words needed. Your closest guess counts.</p>
+        </section>
+        <button id="begin-button" class="primary-button" type="button">Let’s taste →</button>
+        ${createDetails("Your learning ladder", '<p><strong>1 · Notice.</strong> A color, an aroma, one detail. That counts.</p><p><strong>2 · Describe.</strong> Build simple words for taste and feel.</p><p><strong>3 · Connect.</strong> Compare glasses and discover what you enjoy.</p>')}
+        <section class="help-stack">
+          ${createDetails("Philosophy", `
+            <p>
+              Wine can feel intimidating because the culture around it often sounds exclusive.
+              But tasting wine is not about proving you know the right words.
+              It is about learning to notice what you experience.
+            </p>
+            <p>
+              This guide uses direct description first: simple observations about look,
+              smell, taste, and feel. Fancy language can come later if you want it.
+            </p>
+            <p>
+              The goal is confidence, enjoyment, and better appreciation — one glass at a time.
+            </p>
+          `)}
+
+          ${createDetails("Wine Tasting Overview", `
+            <p>This guide walks through five simple moves:</p>
+            <ol>
+              <li><strong>Look</strong> — notice the color.</li>
+              <li><strong>Smell</strong> — choose the broad aroma family.</li>
+              <li><strong>Taste</strong> — notice sweetness and acidity.</li>
+              <li><strong>Feel</strong> — notice body, tannin, and finish.</li>
+              <li><strong>Reflect</strong> — decide what you thought and what you learned.</li>
+            </ol>
+            <p>
+              The early steps are intentionally easy. Later steps include Skip because taste
+              and feel take practice. You are still learning even when you skip.
+            </p>
+          `)}
+        </section>
       `;
 
     case "Look":
       return `
-    <p>Start simple. What color is the wine?</p>
+        ${createLessonNote(
+          "Hold the glass over a light background and look at the color.",
+          "Color is the easiest first clue. It helps you start describing the wine before you smell or taste it.",
+          "Red, white, or rosé is enough for Level 1."
+        )}
 
-    <label for="look-color">Wine color</label>
-    <select id="look-color">
-      <option value="">Select one</option>
-      <option value="Red" ${tastingData.look.color === "Red" ? "selected" : ""}>Red</option>
-      <option value="White" ${tastingData.look.color === "White" ? "selected" : ""}>White</option>
-      <option value="Rosé" ${tastingData.look.color === "Rosé" ? "selected" : ""}>Rosé</option>
-    </select>
+        <section class="input-card">
+          <h3>Your Tasting Note</h3>
 
-    <label for="look-note">Optional comment</label>
-    <textarea id="look-note" rows="4" placeholder="Anything you notice about the appearance?">${tastingData.look.note}</textarea>
+          ${createChoices("look-color", ["Red", "White", "Rosé"], tastingData.look.color)}
+
+          <label for="look-note">What do you notice about the color or appearance?</label>
+          <textarea id="look-note" rows="4" placeholder="Optional">${escapeHTML(tastingData.look.note)}</textarea>
+        </section>
       `;
 
     case "Smell":
       return `
-        <p>What kind of smell stands out most?</p>
+        ${createLessonNote(
+          "Swirl the glass, then take two or three slow sniffs.",
+          "Smell is a huge part of tasting. Much of what we think of as flavor actually comes from aroma, so smelling the wine helps you notice more before you sip.",
+          "You do not need the perfect aroma word. Fruit, floral, herbal, earthy, spicy, or other is enough for Level 1."
+        )}
 
-        <label for="smell-aroma">Aroma family</label>
-        <select id="smell-aroma">
-          <option value="">Select one</option>
-          <option value="Fruit" ${tastingData.smell.aroma === "Fruit" ? "selected" : ""}>Fruit</option>
-          <option value="Floral" ${tastingData.smell.aroma === "Floral" ? "selected" : ""}>Floral</option>
-          <option value="Herbal" ${tastingData.smell.aroma === "Herbal" ? "selected" : ""}>Herbal</option>
-          <option value="Earthy" ${tastingData.smell.aroma === "Earthy" ? "selected" : ""}>Earthy</option>
-          <option value="Spicy" ${tastingData.smell.aroma === "Spicy" ? "selected" : ""}>Spicy</option>
-          <option value="Other" ${tastingData.smell.aroma === "Other" ? "selected" : ""}>Other</option>
-        </select>
+        <section class="input-card">
+          <h3>Your Tasting Note</h3>
 
-        <label for="smell-note">Optional comment</label>
-        <textarea id="smell-note" rows="4" placeholder="What stands out most to you?">${tastingData.smell.note}</textarea>
+          ${createChoices("smell-aroma", ["Fruit", "Floral", "Herbal", "Earthy", "Spicy", "Other"], tastingData.smell.aroma)}
+
+          <label for="smell-note">What does it remind you of?</label>
+          <textarea id="smell-note" rows="4" placeholder="Optional">${escapeHTML(tastingData.smell.note)}</textarea>
+        </section>
+
+        <section class="help-stack">
+          ${createDetails("Why swirl?", `
+            <p>
+              Swirling is not just for looking fancy. It spreads the wine across the glass,
+              which helps more aroma rise up so you can smell it.
+            </p>
+            <p>
+              You do not need a dramatic restaurant swirl. A gentle swirl is enough.
+            </p>
+            <p>
+              Or be dramatic and be fancy. Have fun, you are drinking wine.
+            </p>
+          `)}
+
+          ${createDetails("Help me choose an aroma family", `
+            <p>Start broad. You are not trying to identify the exact smell yet.</p>
+            <ul>
+              <li><strong>Fruit:</strong> berries, citrus, apple, peach, plum, tropical fruit</li>
+              <li><strong>Floral:</strong> flowers, perfume, rose, violet, honeysuckle</li>
+              <li><strong>Herbal:</strong> grass, mint, tea, green pepper, fresh herbs</li>
+              <li><strong>Earthy:</strong> soil, mushroom, leaves, wet stone, forest floor</li>
+              <li><strong>Spicy:</strong> pepper, cinnamon, clove, vanilla, baking spice</li>
+              <li><strong>Other:</strong> anything that does not fit, or anything you are unsure about</li>
+            </ul>
+          `)}
+        </section>
       `;
 
     case "Taste":
       return `
-        <p>How would you describe the taste?</p>
+        ${createLessonNote(
+          "Take a sip and let it sit for a few seconds before judging.",
+          "Taste starts with two simple questions: does it taste dry or sweet, and how tangy does it feel? These are direct observations, not fancy guesses.",
+          "If you are unsure, pick the closest answer or use Skip. You are still learning."
+        )}
 
-        <label for="taste-dryness">Dryness</label>
-        <select id="taste-dryness">
-          <option value="">Select one</option>
-          <option value="Dry" ${tastingData.taste.dryness === "Dry" ? "selected" : ""}>Dry</option>
-          <option value="Off-dry" ${tastingData.taste.dryness === "Off-dry" ? "selected" : ""}>Off-dry</option>
-          <option value="Sweet" ${tastingData.taste.dryness === "Sweet" ? "selected" : ""}>Sweet</option>
-          <option value="Skip" ${tastingData.taste.dryness === "Skip" ? "selected" : ""}>Skip</option>
-        </select>
+        <section class="input-card">
+          <h3>Your Tasting Note</h3>
 
-        <label for="taste-body">Body</label>
-        <select id="taste-body">
-          <option value="">Select one</option>
-          <option value="Light" ${tastingData.taste.body === "Light" ? "selected" : ""}>Light</option>
-          <option value="Medium" ${tastingData.taste.body === "Medium" ? "selected" : ""}>Medium</option>
-          <option value="Full" ${tastingData.taste.body === "Full" ? "selected" : ""}>Full</option>
-          <option value="Skip" ${tastingData.taste.body === "Skip" ? "selected" : ""}>Skip</option>
-        </select>
+          ${createChoices("taste-dryness", ["Dry", "Off-dry", "Sweet", "Skip"], tastingData.taste.dryness)}
 
-        <label for="taste-note">Optional comment</label>
-        <textarea id="taste-note" rows="4" placeholder="Any simple taste notes?">${tastingData.taste.note}</textarea>
+          ${createChoices("taste-acidity", ["Low", "Medium", "High", "Skip"], tastingData.taste.acidity)}
+
+          <label for="taste-note">What simple taste impression stands out?</label>
+          <textarea id="taste-note" rows="4" placeholder="Optional">${escapeHTML(tastingData.taste.note)}</textarea>
+        </section>
+
+        <section class="help-stack">
+          ${createDetails("Help me choose dryness", `
+            <p>
+              Dry means the wine does <strong>not</strong> taste sweet.
+              Most table wines are dry, even when they smell fruity.
+            </p>
+            <p>
+              A helpful shortcut: most red wines are dry. If you are tasting a red wine
+              and it does not taste sugary, Dry is usually a safe starting choice.
+            </p>
+            <p>
+              For white and rosé wines, sweetness varies more. Many are still dry,
+              but some may taste a little sweet or noticeably sweet. If it tastes slightly
+              sweet but not sugary, choose Off-dry. If it clearly tastes sugary, choose Sweet.
+            </p>
+            <p>
+              Fruity smell and sweet taste are not the same thing. A wine can smell like
+              berries, citrus, apple, or peach and still taste dry.
+            </p>
+            <p>If you are not sure, use Skip and keep going.</p>
+          `)}
+
+          ${createDetails("Help me choose acidity", `
+            <p>
+              Acidity is the tangy, mouthwatering feeling that makes wine feel bright or refreshing.
+            </p>
+            <ul>
+              <li><strong>Low acidity:</strong> soft, smooth, and round. It does not make your mouth water much. Think of a mellow ripe pear or baked apple.</li>
+              <li><strong>Medium acidity:</strong> fresh and balanced. You notice some tang, but it does not dominate. Think of a crisp apple.</li>
+              <li><strong>High acidity:</strong> bright, sharp, and very mouthwatering. It makes your mouth water quickly. Think lemon juice, sour candy, or a tart green apple.</li>
+            </ul>
+            <p>
+              You are not trying to measure acid like a scientist. Just ask:
+              does this feel soft, fresh, or sharply tangy?
+            </p>
+          `)}
+        </section>
       `;
 
     case "Feel":
       return `
-        <p>How does the wine feel in your mouth?</p>
+        ${createLessonNote(
+          "Take another sip. Let it coat your mouth, then swallow and notice what lingers.",
+          "Feel is about texture and structure. Some wines feel light, some feel heavy, some feel drying, and some leave a longer impression after you swallow.",
+          "Pick the closest answer or use Skip. Even noticing one part of the feel is a real tasting skill."
+        )}
 
-        <label for="feel-acidity">Acidity</label>
-        <select id="feel-acidity">
-          <option value="">Select one</option>
-          <option value="Low" ${tastingData.feel.acidity === "Low" ? "selected" : ""}>Low</option>
-          <option value="Medium" ${tastingData.feel.acidity === "Medium" ? "selected" : ""}>Medium</option>
-          <option value="High" ${tastingData.feel.acidity === "High" ? "selected" : ""}>High</option>
-          <option value="Skip" ${tastingData.feel.acidity === "Skip" ? "selected" : ""}>Skip</option>
-        </select>
+        <section class="input-card">
+          <h3>Your Tasting Note</h3>
 
-        <label for="feel-tannin">Tannin</label>
-        <select id="feel-tannin">
-          <option value="">Select one</option>
-          <option value="Low" ${tastingData.feel.tannin === "Low" ? "selected" : ""}>Low</option>
-          <option value="Medium" ${tastingData.feel.tannin === "Medium" ? "selected" : ""}>Medium</option>
-          <option value="High" ${tastingData.feel.tannin === "High" ? "selected" : ""}>High</option>
-          <option value="N/A" ${tastingData.feel.tannin === "N/A" ? "selected" : ""}>N/A</option>
-          <option value="Skip" ${tastingData.feel.tannin === "Skip" ? "selected" : ""}>Skip</option>
-        </select>
+          ${createChoices("feel-body", ["Light", "Medium", "Full", "Skip"], tastingData.feel.body)}
 
-        <label for="feel-finish">Finish</label>
-        <select id="feel-finish">
-          <option value="">Select one</option>
-          <option value="Short" ${tastingData.feel.finish === "Short" ? "selected" : ""}>Short</option>
-          <option value="Medium" ${tastingData.feel.finish === "Medium" ? "selected" : ""}>Medium</option>
-          <option value="Long" ${tastingData.feel.finish === "Long" ? "selected" : ""}>Long</option>
-          <option value="Skip" ${tastingData.feel.finish === "Skip" ? "selected" : ""}>Skip</option>
-        </select>
+          ${createChoices("feel-tannin", ["Low", "Medium", "High", "N/A", "Skip"], tastingData.feel.tannin)}
 
-        <label for="feel-note">Optional comment</label>
-        <textarea id="feel-note" rows="4" placeholder="Anything you notice about the feel?">${tastingData.feel.note}</textarea>
+          ${createChoices("feel-finish", ["Short", "Medium", "Long", "Skip"], tastingData.feel.finish)}
+
+          <label for="feel-note">How did the wine feel in your mouth?</label>
+          <textarea id="feel-note" rows="4" placeholder="Optional">${escapeHTML(tastingData.feel.note)}</textarea>
+        </section>
+
+        <section class="learning-tip">
+          <h3>Learning Tip</h3>
+          <p>
+            Try guessing first, then open the hints. That little loop — guess, check, adjust —
+            is how this starts to stick.
+          </p>
+          <p>
+            Also, do not try to master body, tannin, and finish all at once.
+            Pick one to focus on for a few tastings. Get comfortable with it, then add the next one.
+          </p>
+          <p>Yes, this means drinking more wine for practice. Tragic.</p>
+        </section>
+
+        <section class="help-stack">
+          ${createDetails("Help me choose body", `
+            <p>Body is the weight or texture of the wine in your mouth.</p>
+            <ul>
+              <li><strong>Light body:</strong> thin, crisp, easy, or watery. Think skim milk.</li>
+              <li><strong>Medium body:</strong> noticeable weight, but not heavy. Think whole milk or chocolate milk.</li>
+              <li><strong>Full body:</strong> rich, heavy, round, or mouth-coating. Think cream or a milkshake.</li>
+            </ul>
+            <p>You are not judging quality. You are just noticing weight.</p>
+          `)}
+
+          ${createDetails("Help me choose tannin", `
+            <p>
+              Tannin is the drying or gripping feeling in your mouth. It is easiest to notice in red wines.
+            </p>
+            <p>Many white and rosé wines will feel like N/A or low tannin. That is normal.</p>
+            <ul>
+              <li><strong>Low tannin:</strong> smooth, soft, little to no drying.</li>
+              <li><strong>Medium tannin:</strong> noticeable grip or dryness, but not harsh.</li>
+              <li><strong>High tannin:</strong> strong drying feeling on your gums, tongue, or cheeks.</li>
+            </ul>
+            <p>Think of over-steeped black tea. That drying, grippy feeling is similar to tannin.</p>
+            <p>Use <strong>N/A</strong> if tannin does not really apply. Use <strong>Skip</strong> if you are unsure.</p>
+          `)}
+
+          ${createDetails("Help me choose finish", `
+            <p>Finish is how long the wine’s flavor or feeling lasts after you swallow.</p>
+            <ul>
+              <li><strong>Short finish:</strong> fades quickly.</li>
+              <li><strong>Medium finish:</strong> lingers for a few seconds.</li>
+              <li><strong>Long finish:</strong> stays with you noticeably after swallowing.</li>
+            </ul>
+            <p>
+              You do not need to time it perfectly. Just ask:
+              did it disappear quickly, linger a bit, or hang around?
+            </p>
+          `)}
+        </section>
       `;
 
-    case "Final Note":
-      const generatedNote = generateTechnicalNote();
+    case "Reflect":
+      const guidedDirectNote = generateGuidedDirectNote();
 
       return `
-      <p>Wrap up your tasting with a quick review and a structured note.</p>
+        ${createLessonNote(
+          "Pause and decide what you actually thought.",
+          "Technical notes help you learn, but wine is still about enjoyment. Your reaction matters too.",
+          "Rate it, decide if you would buy it again, and write one plain sentence if you want."
+        )}
 
-      <label for="review-stars">Rating</label>
-      <select id="review-stars">
-        <option value="">Select one</option>
-        <option value="1" ${tastingData.review.stars === "1" ? "selected" : ""}>1 star</option>
-        <option value="2" ${tastingData.review.stars === "2" ? "selected" : ""}>2 stars</option>
-        <option value="3" ${tastingData.review.stars === "3" ? "selected" : ""}>3 stars</option>
-        <option value="4" ${tastingData.review.stars === "4" ? "selected" : ""}>4 stars</option>
-        <option value="5" ${tastingData.review.stars === "5" ? "selected" : ""}>5 stars</option>
-      </select>
+        <section class="input-card">
+          <h3>Quick Reaction</h3>
 
-      <label for="review-buy-again">Would you buy it again?</label>
-      <select id="review-buy-again">
-        <option value="">Select one</option>
-        <option value="Yes" ${tastingData.review.buyAgain === "Yes" ? "selected" : ""}>Yes</option>
-        <option value="No" ${tastingData.review.buyAgain === "No" ? "selected" : ""}>No</option>
-        <option value="Maybe" ${tastingData.review.buyAgain === "Maybe" ? "selected" : ""}>Maybe</option>
-      </select>
+          ${createChoices("reflect-stars", ["1 star", "2 stars", "3 stars", "4 stars", "5 stars"], tastingData.reflect.stars)}
 
-      <label for="review-user-review">Your review</label>
-      <textarea id="review-user-review" rows="4" placeholder="What did you think?">${tastingData.review.userReview}</textarea>
+          ${createChoices("reflect-buy-again", ["Yes", "No", "Maybe"], tastingData.reflect.buyAgain)}
 
-      <label for="review-generated-note">Generated technical note</label>
-      <textarea id="review-generated-note" rows="5" readonly>${generatedNote}</textarea>
+                  </section>
 
-      <label for="review-user-technical-note">Your technical note</label>
-      <textarea id="review-user-technical-note" rows="5" placeholder="Try writing your own tasting note...">${tastingData.review.userTechnicalNote}</textarea>
+        <section class="input-card">
+          <h3>Your Take</h3>
+          <label for="reflect-user-take">In plain words, what stood out?</label>
+          <textarea id="reflect-user-take" rows="4" placeholder="Example: Bright and fruity. I liked it more than expected.">${escapeHTML(tastingData.reflect.userTake)}</textarea>
+        </section>
+
+        <section class="generated-note-card">
+          <h3>Guided Direct Note</h3>
+          <p>Here is a simple direct note based on your choices.</p>
+          <div class="generated-note-text">${escapeHTML(guidedDirectNote)}</div>
+        </section>
+
+        <section class="input-card">
+          <h3>Try Your Own Tasting Note</h3>
+          <p>This is optional. The goal is practice, not perfection.</p>
+          <label for="reflect-user-tasting-note">Want to practice? Rewrite the note in your own words.</label>
+          <textarea id="reflect-user-tasting-note" rows="5" placeholder="Optional">${escapeHTML(tastingData.reflect.userTastingNote)}</textarea>
+        </section>
+
+        <section class="learning-tip">
+          <h3>Learning Tip</h3>
+          <p>
+            Try comparing this wine to the next one you drink.
+            Comparison is where the learning gets faster.
+          </p>
+          <p>
+            You do not need to remember everything. Just notice one thing that was different.
+          </p>
+        </section>
       `;
 
     default:
@@ -223,127 +434,62 @@ function getStepMarkup(stepName) {
   }
 }
 
-function attachStepEvents() {
-  if (steps[currentStepIndex] === "Welcome") {
-    const beginButton = document.getElementById("begin-button");
-    if (beginButton) {
-      beginButton.addEventListener("click", () => {
-        currentStepIndex = 1;
-        renderStep();
-      });
-    }
-  }
-}
+// -----------------------------
+// Save and validation
+// -----------------------------
 
-function renderStep() {
-  const currentStepName = steps[currentStepIndex];
-
-  stepTitle.textContent = currentStepName;
-  stepContent.innerHTML = getStepMarkup(currentStepName);
-
-  updateProgress();
-  updateNavigation();
-  attachStepEvents();
-}
-function generateTechnicalNote() {
-  const parts = [];
-
-  if (tastingData.look.color) {
-    parts.push(`${tastingData.look.color} in color`);
-  }
-
-  if (tastingData.smell.aroma) {
-    parts.push(`${tastingData.smell.aroma.toLowerCase()} aromas on the nose`);
-  }
-
-  if (tastingData.taste.dryness && tastingData.taste.dryness !== "Skip") {
-    parts.push(`${tastingData.taste.dryness.toLowerCase()} on the palate`);
-  }
-
-  if (tastingData.taste.body && tastingData.taste.body !== "Skip") {
-    parts.push(`${tastingData.taste.body.toLowerCase()} body`);
-  }
-
-  if (tastingData.feel.acidity && tastingData.feel.acidity !== "Skip") {
-    parts.push(`${tastingData.feel.acidity.toLowerCase()} acidity`);
-  }
-
-  if (tastingData.feel.tannin && tastingData.feel.tannin !== "Skip") {
-    parts.push(`${tastingData.feel.tannin.toLowerCase()} tannin`);
-  }
-
-  if (tastingData.feel.finish && tastingData.feel.finish !== "Skip") {
-    parts.push(`${tastingData.feel.finish.toLowerCase()} finish`);
-  }
-
-  const comments = [
-    tastingData.look.note,
-    tastingData.smell.note,
-    tastingData.taste.note,
-    tastingData.feel.note
-  ].filter(note => note && note.trim() !== "");
-
-  let noteText = parts.length > 0
-    ? `This wine is ${parts.join(", ")}.`
-    : "No structured tasting note available yet.";
-
-  if (comments.length > 0) {
-    noteText += ` Notes: ${comments.join(" ")}`;
-  }
-
-  tastingData.review.generatedTechnicalNote = noteText;
-  return noteText;
-}
 function saveCurrentStepData() {
   const currentStepName = steps[currentStepIndex];
 
   if (currentStepName === "Look") {
-    const colorSelect = document.getElementById("look-color");
+    const colorField = document.getElementById("look-color");
     const noteField = document.getElementById("look-note");
 
-    tastingData.look.color = colorSelect ? colorSelect.value : "";
+    tastingData.look.color = colorField ? readChoice(colorField) : "";
     tastingData.look.note = noteField ? noteField.value.trim() : "";
   }
 
   if (currentStepName === "Smell") {
-    const aromaSelect = document.getElementById("smell-aroma");
+    const aromaField = document.getElementById("smell-aroma");
     const noteField = document.getElementById("smell-note");
 
-    tastingData.smell.aroma = aromaSelect ? aromaSelect.value : "";
+    tastingData.smell.aroma = aromaField ? readChoice(aromaField) : "";
     tastingData.smell.note = noteField ? noteField.value.trim() : "";
   }
 
   if (currentStepName === "Taste") {
-    const drynessSelect = document.getElementById("taste-dryness");
-    const bodySelect = document.getElementById("taste-body");
+    const drynessField = document.getElementById("taste-dryness");
+    const acidityField = document.getElementById("taste-acidity");
     const noteField = document.getElementById("taste-note");
 
-    tastingData.taste.dryness = drynessSelect ? drynessSelect.value : "";
-    tastingData.taste.body = bodySelect ? bodySelect.value : "";
+    tastingData.taste.dryness = drynessField ? readChoice(drynessField) : "";
+    tastingData.taste.acidity = acidityField ? readChoice(acidityField) : "";
     tastingData.taste.note = noteField ? noteField.value.trim() : "";
   }
 
   if (currentStepName === "Feel") {
-    const aciditySelect = document.getElementById("feel-acidity");
-    const tanninSelect = document.getElementById("feel-tannin");
-    const finishSelect = document.getElementById("feel-finish");
+    const bodyField = document.getElementById("feel-body");
+    const tanninField = document.getElementById("feel-tannin");
+    const finishField = document.getElementById("feel-finish");
     const noteField = document.getElementById("feel-note");
 
-    tastingData.feel.acidity = aciditySelect ? aciditySelect.value : "";
-    tastingData.feel.tannin = tanninSelect ? tanninSelect.value : "";
-    tastingData.feel.finish = finishSelect ? finishSelect.value : "";
+    tastingData.feel.body = bodyField ? readChoice(bodyField) : "";
+    tastingData.feel.tannin = tanninField ? readChoice(tanninField) : "";
+    tastingData.feel.finish = finishField ? readChoice(finishField) : "";
     tastingData.feel.note = noteField ? noteField.value.trim() : "";
   }
-    if (currentStepName === "Final Note") {
-    const starsSelect = document.getElementById("review-stars");
-    const buyAgainSelect = document.getElementById("review-buy-again");
-    const userReviewField = document.getElementById("review-user-review");
-    const userTechnicalNoteField = document.getElementById("review-user-technical-note");
 
-    tastingData.review.stars = starsSelect ? starsSelect.value : "";
-    tastingData.review.buyAgain = buyAgainSelect ? buyAgainSelect.value : "";
-    tastingData.review.userReview = userReviewField ? userReviewField.value.trim() : "";
-    tastingData.review.userTechnicalNote = userTechnicalNoteField ? userTechnicalNoteField.value.trim() : "";
+  if (currentStepName === "Reflect") {
+    const starsField = document.getElementById("reflect-stars");
+    const buyAgainField = document.getElementById("reflect-buy-again");
+    const userTakeField = document.getElementById("reflect-user-take");
+    const userTastingNoteField = document.getElementById("reflect-user-tasting-note");
+
+    tastingData.reflect.stars = starsField ? readChoice(starsField) : "";
+    tastingData.reflect.buyAgain = buyAgainField ? readChoice(buyAgainField) : "";
+    tastingData.reflect.userTake = userTakeField ? userTakeField.value.trim() : "";
+    tastingData.reflect.userTastingNote = userTastingNoteField ? userTastingNoteField.value.trim() : "";
+    tastingData.reflect.guidedDirectNote = generateGuidedDirectNote();
   }
 }
 
@@ -359,27 +505,101 @@ function validateCurrentStep() {
   }
 
   if (currentStepName === "Taste") {
-    return tastingData.taste.dryness !== "" && tastingData.taste.body !== "";
+    return tastingData.taste.dryness !== "" && tastingData.taste.acidity !== "";
   }
 
   if (currentStepName === "Feel") {
     return (
-      tastingData.feel.acidity !== "" &&
+      tastingData.feel.body !== "" &&
       tastingData.feel.tannin !== "" &&
       tastingData.feel.finish !== ""
     );
   }
-    if (currentStepName === "Final Note") {
-    return tastingData.review.stars !== "" && tastingData.review.buyAgain !== "";
+
+  if (currentStepName === "Reflect") {
+    return tastingData.reflect.stars !== "" && tastingData.reflect.buyAgain !== "";
   }
 
   return true;
 }
+
+// -----------------------------
+// Render and event attachment
+// -----------------------------
+
+function attachStepEvents() {
+  document.getElementById('begin-button')?.addEventListener('click', () => {
+    currentStepIndex = 1;
+    renderStep();
+  });
+  stepContent.querySelectorAll('input[type="radio"]').forEach(input => {
+    input.addEventListener('change', () => {
+      saveCurrentStepData();
+      if (document.querySelector('.app-card').dataset.complete) {
+        delete document.querySelector('.app-card').dataset.complete;
+        stepTitle.textContent = 'A glass, understood.';
+        updateNavigation();
+      }
+      document.getElementById('selection-status').textContent = validateCurrentStep() ? ['','Nice — you just described wine.','Nice — you are building aroma vocabulary.','Nice — you are noticing taste.','Nice — you are noticing structure.','Your reaction belongs in this story, too.'][currentStepIndex] : '';
+      document.getElementById('validation-message').textContent = '';
+    });
+  });
+  stepContent.querySelectorAll('textarea').forEach(textarea => textarea.addEventListener('input', saveCurrentStepData));
+}
+
+function polishStep() {
+  // Keep writing available without making it part of the required task.
+  stepContent.querySelectorAll('textarea').forEach(textarea => {
+    const label = stepContent.querySelector('label[for="' + textarea.id + '"]');
+    const details = document.createElement('details');
+    details.className = 'help-details optional-note';
+    const summary = document.createElement('summary');
+    summary.textContent = textarea.id === 'reflect-user-take' ? 'Your take · optional' : textarea.id === 'reflect-user-tasting-note' ? 'Try your own tasting note · optional' : 'Add a note · optional';
+    const wrapper = document.createElement('div'); wrapper.className = 'help-content';
+    textarea.before(details); details.append(summary, wrapper);
+    if (label) wrapper.append(label);
+    wrapper.append(textarea); textarea.rows = 3;
+    if (textarea.value) details.open = true;
+  });
+  stepContent.querySelectorAll('.learning-tip').forEach(node => {
+    const details = document.createElement('details'); details.className = 'help-details';
+    details.innerHTML = '<summary>A little learning tip</summary><div class="help-content">' + node.innerHTML + '</div>';
+    node.replaceWith(details);
+  });
+  if (currentStepIndex === 5) {
+    stepContent.querySelectorAll('.input-card').forEach(node => {
+      if (!node.querySelector('fieldset')) { node.querySelectorAll('h3,p').forEach(child => child.remove()); node.classList.add('optional-section'); }
+    });
+    const note = stepContent.querySelector('.generated-note-card');
+    stepContent.querySelector('.lesson-card').after(note);
+  }
+}
+
+function renderStep() {
+  const currentStepName = steps[currentStepIndex];
+
+  stepTitle.textContent = ['Welcome', 'First, take a look.', 'Follow your nose.', 'Time for a sip.', 'Notice the feeling.', 'A glass, understood.'][currentStepIndex];
+  document.querySelector('.app-card').dataset.step = currentStepName.toLowerCase();
+  delete document.querySelector('.app-card').dataset.complete;
+  stepContent.innerHTML = getStepMarkup(currentStepName);
+
+  polishStep();
+  document.getElementById('selection-status').textContent = '';
+  document.getElementById('validation-message').textContent = '';
+  updateProgress();
+  updateNavigation();
+  attachStepEvents();
+  stepTitle.focus({preventScroll: true});
+  window.scrollTo(0, 0);
+}
+
 // -----------------------------
 // Navigation events
 // -----------------------------
 
 backButton.addEventListener("click", () => {
+  saveCurrentStepData();
+
   if (currentStepIndex > 0) {
     currentStepIndex -= 1;
     renderStep();
@@ -390,7 +610,9 @@ nextButton.addEventListener("click", () => {
   saveCurrentStepData();
 
   if (!validateCurrentStep()) {
-    alert("Please make a selection before continuing.");
+    document.getElementById('validation-message').textContent = 'Pick an answer for each question. On Taste and Feel, Skip is an answer too.';
+    const missing = [...stepContent.querySelectorAll('fieldset')].find(field => !field.querySelector('input:checked'));
+    missing?.querySelector('input').focus();
     return;
   }
 
@@ -398,7 +620,11 @@ nextButton.addEventListener("click", () => {
     currentStepIndex += 1;
     renderStep();
   } else {
-    alert("Prototype flow complete. Nice work.");
+    document.querySelector('.app-card').dataset.complete = 'true';
+    stepTitle.textContent = 'You just tasted with curiosity.';
+    document.getElementById('selection-status').textContent = 'Tasting complete. You looked, smelled, tasted, and made it your own. Next glass, notice one thing that is different.';
+    nextButton.style.display = 'none';
+    stepTitle.focus();
   }
 });
 
@@ -407,7 +633,3 @@ nextButton.addEventListener("click", () => {
 // -----------------------------
 
 renderStep();
-
-// Helpful for debugging in the browser console
-console.log("Wine Tutorial App loaded.");
-console.log("Initial tasting data:", tastingData);

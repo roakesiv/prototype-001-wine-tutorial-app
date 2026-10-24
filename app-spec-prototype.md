@@ -706,3 +706,19 @@ These decisions should guide the implementation work for Days 4 and 5.
 This file is the source of truth for Prototype 02 app behavior and content structure during the sprint.
 
 If the step logic, lesson-note strategy, or final-step design changes during the sprint, this spec should be updated to match.
+
+
+## 17. Visual experience revision (October 23, 2026)
+
+This revision supersedes the earlier visible-copy and screen-layout recommendations. The six steps and required fields are unchanged.
+
+- styles.css is the single app stylesheet, incorporating the complete Prototype 02 component coverage; the unreferenced styles-prototype.css is removed.
+- Welcome shows a brief invitation and one start action. The learning ladder, philosophy, and overview remain available in collapsed disclosures.
+- Lesson Note shows the action and reassurance; Why this matters is optional. Your Tasting Note remains visually separate.
+- Native radio groups replace dropdowns. Each group has a question legend, large tap targets, and standard Tab / arrow / Space keyboard interaction. No answer is preselected.
+- Look and Smell require answers with no Skip. Every Taste and Feel field requires an explicit choice, including Skip when unsure. Reflect requires rating and buy-again.
+- Optional notes, personal take, practice writing, and deeper learning tips use disclosures. Notes survive Back/Next; entered notes reopen on return.
+- Each step has one primary action: start, Next with destination, or Finish tasting. Back remains available after Welcome. Validation is inline and focuses the unanswered group. Selection changes preserve focus and open help.
+- Reflect leads with a read-only guided direct note, then Quick Reaction and optional writing. Finish shows an inline completion message, preserves the note and responses, and keeps Back available. No modal alert or reset. Changing a structured reaction after completion clears the completion message and restores Finish so the revised reaction can be confirmed.
+- Skipped structured values and N/A tannin are omitted from the generated direct note. Free-text notes are displayed as text.
+- Responses remain in memory for this session only; there is no persistence or saving service.
